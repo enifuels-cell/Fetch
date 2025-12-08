@@ -11,10 +11,11 @@ const {
   getBooking,
 } = require('../controllers/bookingController');
 const { protect, authorize } = require('../middleware/auth');
+const { bookingLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
-router.post('/', protect, authorize('user'), createBooking);
+router.post('/', protect, authorize('user'), bookingLimiter, createBooking);
 router.get('/my-bookings', protect, authorize('user'), getMyBookings);
 router.get('/rider-bookings', protect, authorize('rider'), getRiderBookings);
 router.get('/available', protect, authorize('rider'), getAvailableBookings);
