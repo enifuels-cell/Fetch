@@ -2,6 +2,14 @@
 
 A full-featured motorcycle ride booking system with role-based authentication (Users, Riders, and Admins).
 
+## 📚 Documentation
+
+- **[Quick Start Guide](QUICKSTART.md)** - Get up and running in minutes
+- **[API Documentation](README.md)** - Complete API reference (this file)
+- **[Testing Guide](TESTING.md)** - Comprehensive testing scenarios
+- **[Architecture](ARCHITECTURE.md)** - System design and architecture
+- **[Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions
+
 ## Features
 
 - **User Management**: Users can register, login, and book motorcycle rides
@@ -9,6 +17,7 @@ A full-featured motorcycle ride booking system with role-based authentication (U
 - **Admin Panel**: Admins can manage users, approve riders, and oversee all bookings
 - **Booking System**: Complete booking workflow from creation to completion with rating system
 - **Authentication**: JWT-based authentication with role-based access control
+- **Security**: Rate limiting, password hashing, and secure token management
 
 ## Tech Stack
 
@@ -16,6 +25,30 @@ A full-featured motorcycle ride booking system with role-based authentication (U
 - **Database**: MongoDB with Mongoose ODM
 - **Authentication**: JWT (JSON Web Tokens)
 - **Password Encryption**: bcryptjs
+- **Rate Limiting**: express-rate-limit
+- **Security**: CORS, input validation
+
+## Quick Start
+
+See [QUICKSTART.md](QUICKSTART.md) for detailed setup instructions.
+
+### TL;DR
+
+```bash
+# Install
+npm install
+
+# Configure
+cp .env.example .env
+
+# Create admin
+npm run create-admin
+
+# Run
+npm run dev
+```
+
+Server starts at `http://localhost:3000`
 
 ## Installation
 
