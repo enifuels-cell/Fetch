@@ -17,6 +17,14 @@
 
 ## 📋 What's Included
 
+### Frontend Application (React)
+- **User Authentication** - Login and registration pages
+- **Passenger Dashboard** - Book rides, track bookings, view history
+- **Rider Dashboard** - Go online/offline, receive requests, manage rides
+- **Real-time Notifications** - WebSocket integration with Pusher
+- **Responsive Design** - Mobile-friendly interface
+- **Modern UI/UX** - Clean, intuitive design with smooth animations
+
 ### Models & Database
 - **User** - Passengers and riders with location tracking
 - **Booking** - Complete booking lifecycle with status tracking
@@ -48,6 +56,7 @@
 - **API_DOCUMENTATION.md** - Complete API reference with examples
 - **DEPLOYMENT.md** - VPS, Docker, and shared hosting deployment guides
 - **SETUP.md** - Detailed setup instructions
+- **FRONTEND.md** - Complete frontend documentation (React app)
 - **PROJECT_SUMMARY.md** - This file
 
 ### Installation Scripts
@@ -508,8 +517,8 @@ Your complete Fetch system is ready for:
 1. Finish local setup with `install.sh` or `install.bat`
 2. Read **QUICK_START.md** for immediate testing
 3. Review **API_DOCUMENTATION.md** for endpoint details
-4. Deploy using **DEPLOYMENT.md** instructions
-5. Build your frontend (React/Vue)
+4. Check **FRONTEND.md** for frontend setup and usage
+5. Deploy using **DEPLOYMENT.md** instructions
 
 ---
 
