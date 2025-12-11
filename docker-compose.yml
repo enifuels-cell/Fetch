@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fetch_app
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - "9000:9000"
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_KEY=
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=fetch
+      - DB_USERNAME=fetch_user
+      - DB_PASSWORD=password
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - fetch_network
+
+  mysql:
+    image: mysql:8.0
+    container_name: fetch_mysql
+    environment:
+      MYSQL_DATABASE: fetch
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_PASSWORD: password
+      MYSQL_USER: fetch_user
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - fetch_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: fetch_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - fetch_network
+
+  nginx:
+    image: nginx:alpine
+    container_name: fetch_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - fetch_network
+
+volumes:
+  mysql_data:
+
+networks:
+  fetch_network:
+    driver: bridge
