@@ -148,6 +148,8 @@ GET    /api/reviews/user/{userId}      - Get user's reviews
 
 ### Installation Steps
 
+#### Backend Setup
+
 1. **Clone/Download the project**
    ```bash
    cd fetch
@@ -183,6 +185,38 @@ GET    /api/reviews/user/{userId}      - Get user's reviews
    ```
 
 The API will be available at `http://localhost:8000/api`
+
+#### Frontend Setup
+
+1. **Navigate to frontend directory**
+   ```bash
+   cd frontend
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment**
+   ```bash
+   cp .env.example .env
+   ```
+   Update the `.env` file with:
+   ```
+   VITE_API_URL=http://localhost:8000/api
+   VITE_PUSHER_KEY=your_pusher_key
+   VITE_PUSHER_CLUSTER=mt1
+   ```
+
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+The frontend will be available at `http://localhost:5173`
+
+**Full Documentation**: See [FRONTEND.md](FRONTEND.md) for complete frontend documentation
 
 ## Rider Matching Algorithm
 

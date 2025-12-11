@@ -24,3 +24,8 @@ yarn-error.log
 *.sublime-workspace
 .env.*.local
 docker-compose.override.yml
+
+# Frontend
+/frontend/node_modules
+/frontend/dist
+/frontend/.env
