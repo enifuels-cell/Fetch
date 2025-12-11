@@ -7,8 +7,7 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ReviewController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('api')->group(function () {
-    Route::prefix('auth')->group(function () {
+Route::prefix('auth')->group(function () {
         Route::post('/register', [AuthController::class, 'register'])->name('register');
         Route::post('/login', [AuthController::class, 'login'])->name('login');
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum')->name('logout');
@@ -41,7 +40,6 @@ Route::prefix('api')->group(function () {
         Route::prefix('reviews')->group(function () {
             Route::post('/', [ReviewController::class, 'store'])->name('reviews.store');
             Route::get('/user/{userId}', [ReviewController::class, 'getUserReviews'])->name('reviews.user');
-        });
     });
 });
 
