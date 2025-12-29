@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Str;
+
 return [
     'name' => env('APP_NAME', 'Fetch'),
     'env' => env('APP_ENV', 'production'),
