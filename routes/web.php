@@ -14,9 +14,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return response()->json([
-        'message' => 'Welcome to Fetch Motorcycle Ride Booking System',
-        'version' => '1.0.0',
-        'api_documentation' => url('/api/health'),
-    ]);
+    return view('welcome');
 });

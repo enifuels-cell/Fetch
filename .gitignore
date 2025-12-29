@@ -1,4 +1,5 @@
 /node_modules
+/public/build
 /public/hot
 /public/storage
 /storage/*.key
@@ -24,3 +25,14 @@ yarn-error.log
 *.sublime-workspace
 .env.*.local
 docker-compose.override.yml
+
+# Laravel specific
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+/storage/logs/*
+!/storage/logs/.gitignore
+composer.lock
+package-lock.json
+
+# OS specific
+Thumbs.db

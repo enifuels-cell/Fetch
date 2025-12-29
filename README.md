@@ -139,14 +139,23 @@ GET    /api/reviews/user/{userId}      - Get user's reviews
 
 ## Installation & Setup
 
+### Quick Setup Options
+
+Choose the setup method that works best for you:
+
+1. **[XAMPP Setup (Windows - Recommended for Beginners)](XAMPP_SETUP.md)** - Complete guide for Windows users using XAMPP
+2. **[Windows Setup (Manual)](WINDOWS_SETUP.md)** - Manual Windows installation or Docker
+3. **[Quick Start (Linux/Mac)](QUICK_START.md)** - Fast setup for Unix-based systems
+4. **[Detailed Setup Guide](SETUP.md)** - Comprehensive setup instructions
+
 ### Prerequisites
 - PHP 8.1+
 - MySQL 5.7+
 - Composer
-- Node.js & npm (for frontend)
+- Node.js & npm (optional, for frontend)
 - Pusher account (for real-time notifications)
 
-### Installation Steps
+### Quick Installation Steps
 
 1. **Clone/Download the project**
    ```bash
@@ -183,6 +192,8 @@ GET    /api/reviews/user/{userId}      - Get user's reviews
    ```
 
 The API will be available at `http://localhost:8000/api`
+
+For **XAMPP users**, see the [XAMPP Setup Guide](XAMPP_SETUP.md) for detailed instructions including virtual host configuration.
 
 ## Rider Matching Algorithm
 
