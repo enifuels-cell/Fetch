@@ -32,24 +32,28 @@ const createBooking = async (req, res) => {
     });
 
     // Find closest available and approved riders
-    const availableRiders = await Rider.find({ isAvailable: true }).populate('user');
-    const approvedRiders = availableRiders.filter(rider => rider.user.isApproved);
+    let closestRiders = [];
+    
+    if (pickupLocation.coordinates) {
+      const availableRiders = await Rider.find({ isAvailable: true }).populate('user');
+      const approvedRiders = availableRiders.filter(rider => rider.user && rider.user.isApproved);
 
-    if (approvedRiders.length > 0 && pickupLocation.coordinates) {
-      // Find closest riders (up to 5)
-      const closestRiders = findClosestRiders(
-        approvedRiders,
-        pickupLocation.coordinates,
-        5
-      );
+      if (approvedRiders.length > 0) {
+        // Find closest riders (up to 5)
+        closestRiders = findClosestRiders(
+          approvedRiders,
+          pickupLocation.coordinates,
+          5
+        );
 
-      // Notify the closest rider
-      if (closestRiders.length > 0) {
-        booking.notifiedRiders = closestRiders.map(rider => ({
-          riderId: rider._id,
-          response: 'pending',
-        }));
-        await booking.save();
+        // Notify the closest riders
+        if (closestRiders.length > 0) {
+          booking.notifiedRiders = closestRiders.map(rider => ({
+            riderId: rider._id,
+            response: 'pending',
+          }));
+          await booking.save();
+        }
       }
     }
 
@@ -59,7 +63,7 @@ const createBooking = async (req, res) => {
     res.status(201).json({
       success: true,
       booking: populatedBooking,
-      message: closestRiders && closestRiders.length > 0 
+      message: closestRiders.length > 0 
         ? `Booking created and closest rider notified`
         : 'Booking created, no riders available nearby',
     });
@@ -459,10 +463,9 @@ const declineBooking = async (req, res) => {
       _id: { $nin: booking.notifiedRiders.map(nr => nr.riderId) },
     }).populate('user');
 
-    const approvedRiders = availableRiders.filter(rider => rider.user.isApproved);
+    const approvedRiders = availableRiders.filter(rider => rider.user && rider.user.isApproved);
 
     if (approvedRiders.length > 0 && booking.pickupLocation.coordinates) {
-      const { findClosestRiders } = require('../utils/distance');
       const closestRiders = findClosestRiders(
         approvedRiders,
         booking.pickupLocation.coordinates,

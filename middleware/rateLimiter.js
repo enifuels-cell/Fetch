@@ -15,14 +15,14 @@ const apiLimiter = rateLimit({
 // Strict rate limiter for authentication endpoints
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // Increased limit for testing (normally 5)
+  max: 5, // Limit failed attempts
   message: {
     success: false,
     message: 'Too many authentication attempts from this IP, please try again after 15 minutes.',
   },
   standardHeaders: true,
   legacyHeaders: false,
-  skipSuccessfulRequests: false,
+  skipSuccessfulRequests: true, // Only count failed requests
 });
 
 // Moderate rate limiter for booking creation
