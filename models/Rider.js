@@ -38,6 +38,10 @@ const riderSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  currentLocation: {
+    lat: Number,
+    lng: Number,
+  },
   rating: {
     type: Number,
     default: 5,

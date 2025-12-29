@@ -10,6 +10,21 @@ const bookingSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Rider',
   },
+  notifiedRiders: [{
+    riderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Rider',
+    },
+    notifiedAt: {
+      type: Date,
+      default: Date.now,
+    },
+    response: {
+      type: String,
+      enum: ['pending', 'accepted', 'declined'],
+      default: 'pending',
+    },
+  }],
   pickupLocation: {
     address: {
       type: String,

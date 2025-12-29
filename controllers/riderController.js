@@ -180,10 +180,58 @@ const getRiderById = async (req, res) => {
   }
 };
 
+// @desc    Update rider location
+// @route   PUT /api/riders/location
+// @access  Private (Rider)
+const updateRiderLocation = async (req, res) => {
+  try {
+    const { lat, lng } = req.body;
+
+    if (!lat || !lng) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide both latitude and longitude',
+      });
+    }
+
+    // Validate coordinates
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid coordinates',
+      });
+    }
+
+    const rider = await Rider.findOne({ user: req.user.id });
+
+    if (!rider) {
+      return res.status(404).json({
+        success: false,
+        message: 'Rider profile not found',
+      });
+    }
+
+    rider.currentLocation = { lat, lng };
+    await rider.save();
+
+    res.json({
+      success: true,
+      message: 'Location updated successfully',
+      location: rider.currentLocation,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   registerRider,
   getRiderProfile,
   updateRiderProfile,
   getAvailableRiders,
   getRiderById,
+  updateRiderLocation,
 };

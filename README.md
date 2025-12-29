@@ -13,9 +13,12 @@ A full-featured motorcycle ride booking system with role-based authentication (U
 ## Features
 
 - **User Management**: Users can register, login, and book motorcycle rides
-- **Rider Management**: Riders can register with vehicle details, accept bookings, and manage rides
+- **Rider Management**: Riders can register with vehicle details, update location, accept/decline bookings, and manage rides
+- **Proximity-Based Matching**: Automatically notifies the closest available riders when a booking is created
+- **Smart Booking Assignment**: If a rider declines, the system automatically notifies the next closest rider
 - **Admin Panel**: Admins can manage users, approve riders, and oversee all bookings
 - **Booking System**: Complete booking workflow from creation to completion with rating system
+- **Location Tracking**: Real-time rider location updates for optimal matching
 - **Authentication**: JWT-based authentication with role-based access control
 - **Security**: Rate limiting, password hashing, and secure token management
 
@@ -236,6 +239,29 @@ Body:
 }
 ```
 
+#### Update Rider Location
+```
+PUT /api/riders/location
+Authorization: Bearer <token> (Rider only)
+Content-Type: application/json
+
+Body:
+{
+  "lat": 40.7128,
+  "lng": -74.0060
+}
+
+Response:
+{
+  "success": true,
+  "message": "Location updated successfully",
+  "location": {
+    "lat": 40.7128,
+    "lng": -74.0060
+  }
+}
+```
+
 #### Get Available Riders
 ```
 GET /api/riders
@@ -341,6 +367,19 @@ Authorization: Bearer <token> (Rider only)
 Response:
 {
   "success": true,
+  "booking": { ... }
+}
+```
+
+#### Decline Booking
+```
+PUT /api/bookings/:id/decline
+Authorization: Bearer <token> (Rider only)
+
+Response:
+{
+  "success": true,
+  "message": "Booking declined. Next closest rider has been notified.",
   "booking": { ... }
 }
 ```
@@ -513,6 +552,7 @@ Response:
 - vehicleYear
 - plateNumber (unique)
 - isAvailable
+- currentLocation (lat/lng coordinates)
 - rating
 - totalRides
 - documents
@@ -521,6 +561,7 @@ Response:
 ### Booking Model
 - user (reference to User)
 - rider (reference to Rider)
+- notifiedRiders (array tracking which riders were notified)
 - pickupLocation
 - dropoffLocation
 - scheduledTime
@@ -547,8 +588,10 @@ Response:
 ### Rider
 - All user permissions
 - Register as rider (requires admin approval)
-- View available bookings
+- Update current location (for proximity matching)
+- View available bookings (only those where they were notified)
 - Accept bookings
+- Decline bookings (system notifies next closest rider)
 - Update booking status (in-progress, completed)
 - View assigned bookings
 
@@ -563,8 +606,12 @@ Response:
 
 ## Booking Workflow
 
-1. **User creates booking** → Status: `pending`
-2. **Rider accepts booking** → Status: `confirmed`
+1. **User creates booking with pickup location** → Status: `pending`
+   - System automatically finds closest 5 available riders
+   - Closest rider is notified first
+2. **Closest rider receives notification**
+   - Option A: **Rider accepts booking** → Status: `confirmed`
+   - Option B: **Rider declines booking** → Next closest rider is automatically notified
 3. **Rider starts ride** → Status: `in-progress`
 4. **Rider completes ride** → Status: `completed`
 5. **User rates the ride** → Rider rating updated
