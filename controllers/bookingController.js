@@ -1,5 +1,7 @@
 const Booking = require('../models/Booking');
 const Rider = require('../models/Rider');
+const User = require('../models/User');
+const { findClosestRiders } = require('../utils/distance');
 
 // @desc    Create a new booking
 // @route   POST /api/bookings
@@ -29,9 +31,37 @@ const createBooking = async (req, res) => {
       notes,
     });
 
+    // Find closest available and approved riders
+    const availableRiders = await Rider.find({ isAvailable: true }).populate('user');
+    const approvedRiders = availableRiders.filter(rider => rider.user.isApproved);
+
+    if (approvedRiders.length > 0 && pickupLocation.coordinates) {
+      // Find closest riders (up to 5)
+      const closestRiders = findClosestRiders(
+        approvedRiders,
+        pickupLocation.coordinates,
+        5
+      );
+
+      // Notify the closest rider
+      if (closestRiders.length > 0) {
+        booking.notifiedRiders = closestRiders.map(rider => ({
+          riderId: rider._id,
+          response: 'pending',
+        }));
+        await booking.save();
+      }
+    }
+
+    const populatedBooking = await Booking.findById(booking._id)
+      .populate('notifiedRiders.riderId', 'vehicleBrand vehicleModel rating currentLocation');
+
     res.status(201).json({
       success: true,
-      booking,
+      booking: populatedBooking,
+      message: closestRiders && closestRiders.length > 0 
+        ? `Booking created and closest rider notified`
+        : 'Booking created, no riders available nearby',
     });
   } catch (error) {
     res.status(500).json({
@@ -99,9 +129,23 @@ const getRiderBookings = async (req, res) => {
 // @access  Private (Rider)
 const getAvailableBookings = async (req, res) => {
   try {
+    const rider = await Rider.findOne({ user: req.user.id });
+
+    if (!rider) {
+      return res.status(404).json({
+        success: false,
+        message: 'Rider profile not found',
+      });
+    }
+
+    // Find bookings where this rider was notified or bookings with no notified riders
     const bookings = await Booking.find({ 
       status: 'pending',
       rider: null,
+      $or: [
+        { 'notifiedRiders.riderId': rider._id },
+        { notifiedRiders: { $size: 0 } },
+      ],
     })
       .populate('user', 'name phone')
       .sort('scheduledTime');
@@ -161,6 +205,14 @@ const acceptBooking = async (req, res) => {
         success: false,
         message: 'This booking has already been accepted',
       });
+    }
+
+    // Update the notified rider's response
+    const notifiedRider = booking.notifiedRiders.find(
+      nr => nr.riderId.toString() === rider._id.toString()
+    );
+    if (notifiedRider) {
+      notifiedRider.response = 'accepted';
     }
 
     booking.rider = rider._id;
@@ -349,6 +401,102 @@ const rateBooking = async (req, res) => {
   }
 };
 
+// @desc    Decline a booking
+// @route   PUT /api/bookings/:id/decline
+// @access  Private (Rider)
+const declineBooking = async (req, res) => {
+  try {
+    const rider = await Rider.findOne({ user: req.user.id });
+
+    if (!rider) {
+      return res.status(404).json({
+        success: false,
+        message: 'Rider profile not found',
+      });
+    }
+
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found',
+      });
+    }
+
+    if (booking.status !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'This booking is no longer pending',
+      });
+    }
+
+    // Update the notified rider's response
+    const notifiedRider = booking.notifiedRiders.find(
+      nr => nr.riderId.toString() === rider._id.toString()
+    );
+
+    if (!notifiedRider) {
+      return res.status(400).json({
+        success: false,
+        message: 'You were not notified about this booking',
+      });
+    }
+
+    if (notifiedRider.response !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'You have already responded to this booking',
+      });
+    }
+
+    notifiedRider.response = 'declined';
+    await booking.save();
+
+    // Find next available rider if any
+    const availableRiders = await Rider.find({ 
+      isAvailable: true,
+      _id: { $nin: booking.notifiedRiders.map(nr => nr.riderId) },
+    }).populate('user');
+
+    const approvedRiders = availableRiders.filter(rider => rider.user.isApproved);
+
+    if (approvedRiders.length > 0 && booking.pickupLocation.coordinates) {
+      const { findClosestRiders } = require('../utils/distance');
+      const closestRiders = findClosestRiders(
+        approvedRiders,
+        booking.pickupLocation.coordinates,
+        1
+      );
+
+      if (closestRiders.length > 0) {
+        booking.notifiedRiders.push({
+          riderId: closestRiders[0]._id,
+          response: 'pending',
+        });
+        await booking.save();
+
+        return res.json({
+          success: true,
+          message: 'Booking declined. Next closest rider has been notified.',
+          booking,
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Booking declined. No other riders available nearby.',
+      booking,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // @desc    Get single booking
 // @route   GET /api/bookings/:id
 // @access  Private
@@ -402,5 +550,6 @@ module.exports = {
   updateBookingStatus,
   cancelBooking,
   rateBooking,
+  declineBooking,
   getBooking,
 };
